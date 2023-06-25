@@ -12,12 +12,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late String? isLoggedIn;
+  late String? name;
 
   void checkLoggedIn() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     isLoggedIn = await prefs.getString('isLoggedIn') ?? "";
+    name = await prefs.getString('name') ?? "";
     setState(() {
       isLoggedIn = isLoggedIn;
+      name = name;
     });
     if (isLoggedIn == null || isLoggedIn == "") {
       // ignore: use_build_context_synchronously
@@ -29,6 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     isLoggedIn = "";
+    name = "";
     // TODO: implement initState
     setState(() {
       checkLoggedIn();
@@ -79,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           color: Colors.yellow,
                         ),
                         SizedBox(width: 8),
-                        Text('Narukami',
+                        Text(name!,
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                       ]),
@@ -90,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           size: 15,
                         ),
                         SizedBox(width: 8),
-                        Text('5000 WP Poin',
+                        Text('0 WP Poin',
                             style: TextStyle(
                               fontSize: 10,
                             )),
@@ -228,6 +232,30 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(fontSize: 10)),
                     ),
                     onTap: () {},
+                  ),
+                  //logout 
+                  ListTile(
+                    enabled: isLoggedIn == "" ? false : true,
+                    leading: Icon(Icons.logout),
+                    title: Transform.translate(
+                        offset: Offset(-16, 0),
+                        child: Text('Logout',
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.bold))),
+                    onTap: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.remove('isLoggedIn');
+                      await prefs.remove('name');
+                      await prefs.remove('email');
+                      await prefs.remove('phone');
+                      await prefs.remove('accessToken');
+
+                      setState(() {
+                        isLoggedIn = "";
+                        name = "";
+                      });
+                    },
                   ),
                 ],
               )

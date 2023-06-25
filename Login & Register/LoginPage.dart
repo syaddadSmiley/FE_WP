@@ -1,12 +1,18 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_new
 
+import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:convert/convert.dart';
+import 'package:waroeng_pangan/BotNav%20&%20Main%20Page/BotNav.dart';
 
 import 'RegisterPage.dart';
 
@@ -20,8 +26,49 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool showPassword = true;
-  TextEditingController _userController = new TextEditingController();
+  TextEditingController _emailController = new TextEditingController();
   TextEditingController _passwordController = new TextEditingController();
+
+  void signIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var url = Uri.parse("http://192.168.0.140:8080/v1/login");
+    var response = await http.post(url, body: jsonEncode({
+        "email": _emailController.text,
+        "password": _passwordController.text
+      }), 
+      headers: {
+        "Content-Type": "application/json"
+      });
+      
+
+    var data = jsonDecode(response.body);
+    if (data['accessToken'] != null) {
+      try{
+        final jwt = JWT.verify(data['accessToken'], SecretKey('access_token_secret'));
+        await prefs.setString('isLoggedIn', 'true');
+        await prefs.setString('accessToken', data['accessToken']);
+        final profile = JWT.decode(data['accessToken']);
+        await prefs.setString('email', profile.payload['email']);
+        await prefs.setString('name', profile.payload['name']);
+        await prefs.setString('phone', profile.payload['phone_number']);
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => BotNavBarPage()));
+      } on JWTExpiredException {
+        print('jwt expired');
+        return;
+      } on JWTException catch (ex) {
+        print(ex.message); // ex: invalid signature
+        return;
+      }
+    }else {
+      String message = data['message'] ?? "2";
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ));
+      return;
+    }
+  }
 
   @override
   void initState() {
@@ -218,7 +265,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Row(
               children: [
                 Text(
-                  "Nomor Ponsel atau Email",
+                  "Email",
                   style: TextStyle(
                       fontFamily: "Poppins", fontWeight: FontWeight.normal),
                 ),
@@ -238,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _userController,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                         ),
@@ -315,15 +362,13 @@ class _LoginPageState extends State<LoginPage> {
               height: 50,
               child: TextButton(
                 onPressed: () {
-                  if (_userController.text.isEmpty ||
+                  if (_emailController.text.isEmpty ||
                       _passwordController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text("Data tidak boleh kosong"),
                     ));
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Berhasil"),
-                    ));
+                    signIn();
                   }
                 },
                 child: Text(

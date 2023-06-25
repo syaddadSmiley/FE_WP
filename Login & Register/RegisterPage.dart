@@ -32,7 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
   //Signup Function
   void signUp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var url = Uri.parse("http://192.168.2.158:8080/v1/signup");
+    var url = Uri.parse("http://192.168.0.140:8080/v1/signup");
     var response = await http.post(url, body: jsonEncode(<String, String>{
       'email': _emailController.text,
       'name': _nameContoller.text,
@@ -58,6 +58,9 @@ class _RegisterPageState extends State<RegisterPage> {
       await prefs.setString('isLoggedIn', 'true');
       await prefs.setString('accessToken', data['accessToken']);
       final profile = JWT.decode(data['accessToken']);
+      await prefs.setString('email', profile.payload['email']);
+      await prefs.setString('name', profile.payload['name']);
+      await prefs.setString('phone', profile.payload['phone_number']);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => BotNavBarPage()));
     } on JWTExpiredException {
