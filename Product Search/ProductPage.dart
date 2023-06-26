@@ -251,10 +251,69 @@ class _ProductPageState extends State<ProductPage> {
 
 class GridCategory extends StatelessWidget {
   final ScrollController scrollController;
-  const GridCategory({
+  GridCategory({
     super.key,
     required this.scrollController,
   });
+
+  final List<Map<String, dynamic>> _productData = [
+    {
+      "id": 1,
+      "name": "Bayam Hijau",
+      "image": "assets/images/bayam.jpg",
+      "price": 10000,
+      "rating": 4.5,
+      "description": "Bayam Hijau",
+      "category": "Sayuran",
+      "stock": 10,
+      "unit": "kg",
+      "seller": "Toko Sayur",
+      "sellerImage": "assets/images/seller1.jpg",
+      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "sellerRating": 4.5,
+      "sellerTime": "08.00 - 17.00",
+      "sellerProduct": 20,
+      "sellerSold": 100,
+    },
+    {
+      "id": 2,
+      "name": "Bayam Merah",
+      "image": "assets/images/bayam.jpg",
+      "price": 10000,
+      "rating": 4.5,
+      "description": "Bayam Merah",
+      "category": "Sayuran",
+      "stock": 10,
+      "unit": "kg",
+      "seller": "Toko Sayur",
+      "sellerImage": "assets/images/seller1.jpg",
+      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "sellerRating": 4.5,
+      "sellerTime": "08.00 - 17.00",
+      "sellerProduct": 20,
+      "sellerSold": 100,
+    },
+    {
+      "id": 3,
+      "name": "Bayam Putih",
+      "image": "assets/images/bayam.jpg",
+      "price": 10000,
+      "rating": 4.5,
+      "description": "Bayam Putih",
+      "category": "Sayuran",
+      "stock": 10,
+      "unit": "kg",
+      "seller": "Toko Sayur",
+      "sellerImage": "assets/images/seller1.jpg",
+      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "sellerRating": 4.5,
+      "sellerTime": "08.00 - 17.00",
+      "sellerProduct": 20},
+      ];
+
+  void fetchProductData() async {
+    
+  }
 
   @override
   Widget build(BuildContext context) {

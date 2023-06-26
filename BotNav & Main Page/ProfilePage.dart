@@ -12,12 +12,21 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late String? isLoggedIn;
+  late String? _name;
+  late String? _email;
+  late String? _phone;
 
   void checkLoggedIn() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     isLoggedIn = await prefs.getString('isLoggedIn') ?? "";
+    _name = await prefs.getString('name') ?? "";
+    _email = await prefs.getString('email') ?? "";
+    _phone = await prefs.getString('phone') ?? "";
     setState(() {
       isLoggedIn = isLoggedIn;
+      _name = _name;
+      _email = _email;
+      _phone = _phone;
     });
     if (isLoggedIn == null || isLoggedIn == "") {
       // ignore: use_build_context_synchronously
@@ -26,9 +35,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+
   @override
   void initState() {
     isLoggedIn = "";
+    _name = "WP User";
+    _email = "";
+    _phone = "";
     // TODO: implement initState
     setState(() {
       checkLoggedIn();
@@ -79,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           color: Colors.yellow,
                         ),
                         SizedBox(width: 8),
-                        Text('Narukami',
+                        Text(_name!,
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                       ]),
@@ -90,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           size: 15,
                         ),
                         SizedBox(width: 8),
-                        Text('5000 WP Poin',
+                        Text('0 WP Poin',
                             style: TextStyle(
                               fontSize: 10,
                             )),
@@ -228,6 +241,37 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(fontSize: 10)),
                     ),
                     onTap: () {},
+                  ),
+                  //ListTile for Logout
+                  ListTile(
+                    visualDensity: isLoggedIn == "" ? VisualDensity(horizontal: 0, vertical: -4) : null,
+                    enabled: isLoggedIn == "" ? false : true,
+                    leading: Icon(Icons.logout),
+                    title: Transform.translate(
+                        offset: Offset(-16, 0),
+                        child: Text('Logout',
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.bold))),
+                    onTap: () {
+                      SharedPreferences.getInstance().then((value) {
+                        value.setString("isLoggedIn", "");
+                        value.setString("name", "WP User");
+                        value.setString("email", "");
+                        value.setString("phone", "");
+                        value.setString("accessToken", "");
+                        }).then((value) => Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => LoginPage(showBottomSheet: false,))));
+                      if (isLoggedIn == "") {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => LoginPage(showBottomSheet: true,)));
+                      } else {
+                        // ignore: use_build_context_synchronously
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => const HistoryPage()));
+                      }
+                    },
                   ),
                 ],
               )

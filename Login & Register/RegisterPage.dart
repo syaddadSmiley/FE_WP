@@ -58,6 +58,10 @@ class _RegisterPageState extends State<RegisterPage> {
       await prefs.setString('isLoggedIn', 'true');
       await prefs.setString('accessToken', data['accessToken']);
       final profile = JWT.decode(data['accessToken']);
+      await prefs.setString('id', profile.payload['id']);
+      await prefs.setString('email', profile.payload['email']);
+      await prefs.setString('name', profile.payload['name']);
+      await prefs.setString('phoneNumber', profile.payload['phone_number']);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => BotNavBarPage()));
     } on JWTExpiredException {

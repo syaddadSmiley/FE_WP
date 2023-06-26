@@ -3,6 +3,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waroeng_pangan/Product%20Search/ProductPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,6 +35,22 @@ class _HomePageState extends State<HomePage> {
 
   int _current = 0;
 
+  late String? _name = "";
+  void initData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _name = prefs.getString('name')!;
+    });
+  }
+
+  @override
+  void initState() {
+    _name = "WP User";
+    initData();
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusBarHeight = MediaQuery.of(context).padding.top;
@@ -52,7 +70,7 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: const [
+                children: [
                   Icon(Icons.location_pin, color: Colors.white),
                   SizedBox(width: 8),
                   Text(
@@ -60,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(color: Colors.white),
                   ),
                   Text(
-                    'Ananda Dwi',
+                    _name!,
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
@@ -198,10 +216,20 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     Expanded(child: SizedBox()),
-                    Text(
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProductPage())
+                        );
+                      },
+                      child:  Text(
                       "Lihat Semua",
                       style: TextStyle(color: Colors.green.shade700),
+                    ),
                     )
+                   
                   ],
                 ),
               ],
