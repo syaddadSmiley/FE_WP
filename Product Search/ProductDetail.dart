@@ -5,8 +5,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  final String? idProduct;
-  const ProductDetailPage({super.key, this.idProduct});
+  final Map? data;
+  const ProductDetailPage({super.key, this.data});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();

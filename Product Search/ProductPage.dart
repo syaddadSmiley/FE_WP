@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:waroeng_pangan/Product%20Search/ProductDetail.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -258,7 +259,7 @@ class GridCategory extends StatelessWidget {
 
   final List<Map<String, dynamic>> _productData = [
     {
-      "id": 1,
+      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
       "name": "Bayam Hijau",
       "image": "assets/images/bayam.jpg",
       "price": 10000,
@@ -269,14 +270,14 @@ class GridCategory extends StatelessWidget {
       "unit": "kg",
       "seller": "Toko Sayur",
       "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
       "sellerRating": 4.5,
       "sellerTime": "08.00 - 17.00",
       "sellerProduct": 20,
       "sellerSold": 100,
     },
     {
-      "id": 2,
+      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
       "name": "Bayam Merah",
       "image": "assets/images/bayam.jpg",
       "price": 10000,
@@ -287,14 +288,14 @@ class GridCategory extends StatelessWidget {
       "unit": "kg",
       "seller": "Toko Sayur",
       "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
       "sellerRating": 4.5,
       "sellerTime": "08.00 - 17.00",
       "sellerProduct": 20,
       "sellerSold": 100,
     },
     {
-      "id": 3,
+      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
       "name": "Bayam Putih",
       "image": "assets/images/bayam.jpg",
       "price": 10000,
@@ -305,7 +306,7 @@ class GridCategory extends StatelessWidget {
       "unit": "kg",
       "seller": "Toko Sayur",
       "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
+      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
       "sellerRating": 4.5,
       "sellerTime": "08.00 - 17.00",
       "sellerProduct": 20},
@@ -321,7 +322,7 @@ class GridCategory extends StatelessWidget {
         controller: scrollController,
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        itemCount: 20,
+        itemCount: _productData.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.8,
@@ -330,7 +331,14 @@ class GridCategory extends StatelessWidget {
         ),
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                            data: _productData[index],
+                          )));
+            },
             child: Container(
               padding: EdgeInsets.all(8),
               // margin: EdgeInsets.all(4),
@@ -360,7 +368,7 @@ class GridCategory extends StatelessWidget {
                   //   height: 70,),
                   SizedBox(height: 15),
                   Text(
-                    "Brokoli Segar Fresh 250gr",
+                    _productData[index]['name'],
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 14,
@@ -371,7 +379,7 @@ class GridCategory extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Rp. 10.000",
+                      _productData[index]['price'].toString(),
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontSize: 12,
