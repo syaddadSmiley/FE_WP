@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, unnecessary_new
 
+import 'dart:convert';
 import 'dart:developer' as dev;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,10 +8,13 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:http/http.dart' as http;
+import 'package:convert/convert.dart';
+import 'package:waroeng_pangan/BotNav%20&%20Main%20Page/BotNav.dart';
 
 import '../BotNav & Main Page/BotNav.dart';
 import 'RegisterPage.dart';
@@ -61,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
         print(ex.message); // ex: invalid signature
         return;
       }
-    }else{
+    }else {
       String message = data['message'] ?? "2";
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(message),
