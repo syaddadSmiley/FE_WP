@@ -279,79 +279,13 @@ class GridCategory extends StatelessWidget {
     required this.productData,
   });
 
-<<<<<<< HEAD
-=======
-  final List<Map<String, dynamic>> _productData = [
-    {
-      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
-      "name": "Bayam Hijau",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Hijau",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20,
-      "sellerSold": 100,
-    },
-    {
-      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
-      "name": "Bayam Merah",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Merah",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20,
-      "sellerSold": 100,
-    },
-    {
-      "id": '370f28b1-0dcb-11ee-8a6e-a8a15988de34',
-      "name": "Bayam Putih",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Putih",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "location": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20},
-      ];
-
-  void fetchProductData() async {
-    
-  }
-
->>>>>>> a81b0e1a6db6458141839170b22fe1567f16609d
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
         controller: scrollController,
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
-<<<<<<< HEAD
         itemCount: productData.length,
-=======
-        itemCount: _productData.length,
->>>>>>> a81b0e1a6db6458141839170b22fe1567f16609d
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.8,
@@ -365,11 +299,7 @@ class GridCategory extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => ProductDetailPage(
-<<<<<<< HEAD
                             data: productData[index],
-=======
-                            data: _productData[index],
->>>>>>> a81b0e1a6db6458141839170b22fe1567f16609d
                           )));
             },
             child: Container(
@@ -401,11 +331,7 @@ class GridCategory extends StatelessWidget {
                   //   height: 70,),
                   SizedBox(height: 15),
                   Text(
-<<<<<<< HEAD
                     productData[index]['name_product'],
-=======
-                    _productData[index]['name'],
->>>>>>> a81b0e1a6db6458141839170b22fe1567f16609d
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 14,
@@ -416,12 +342,8 @@ class GridCategory extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-<<<<<<< HEAD
                       "Rp."+productData[index]['price'].toString(),
                       semanticsLabel: "Rp. 15.000",
-=======
-                      _productData[index]['price'].toString(),
->>>>>>> a81b0e1a6db6458141839170b22fe1567f16609d
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontSize: 12,
