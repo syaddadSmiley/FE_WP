@@ -114,21 +114,21 @@ class _PengirimanPageState extends State<PengirimanPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.verified,
-                                    color: Colors.green,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'DonnStore',
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
+                              // Row(
+                              //   children: [
+                              //     Icon(
+                              //       Icons.verified,
+                              //       color: Colors.green,
+                              //     ),
+                              //     SizedBox(width: 8),
+                              //     Text(
+                              //       'DonnStore',
+                              //       style: TextStyle(
+                              //           color: Color.fromRGBO(0, 0, 0, 1),
+                              //           fontWeight: FontWeight.bold),
+                              //     ),
+                              //   ],
+                              // ),
                               SizedBox(height: 8),
                               IntrinsicHeight(
                                 child: Row(

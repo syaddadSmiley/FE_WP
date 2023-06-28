@@ -1,52 +1,84 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_new
+//page for list of address user
 
 import 'dart:developer' as dev;
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:waroeng_pangan/BotNav%20&%20Main%20Page/BotNav.dart';
 import 'package:waroeng_pangan/BotNav%20&%20Main%20Page/HomePage.dart';
-import 'package:waroeng_pangan/Login%20&%20Register/InitAddressPage.dart';
 import 'package:waroeng_pangan/Login%20&%20Register/LoginPage.dart';
 import 'package:waroeng_pangan/Login%20&%20Register/OtpPage.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class InitAddressPage extends StatefulWidget {
+  final String? token;
+  final String? idUser;
+  const InitAddressPage({super.key, required this.token, this.idUser});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<InitAddressPage> createState() => _InitAddressPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  bool showPassword = true;
-  bool showPassword2 = true;
-  TextEditingController _emailController = new TextEditingController();
-  TextEditingController _nameContoller = new TextEditingController();
-  TextEditingController _passwordController = new TextEditingController();
-  TextEditingController _passwordController2 = new TextEditingController();
-  TextEditingController _phoneController = new TextEditingController();
+class _InitAddressPageState extends State<InitAddressPage> {
+  TextEditingController _address = TextEditingController();
+  TextEditingController _city = TextEditingController();
+  TextEditingController _province = TextEditingController();
+  TextEditingController _postalCode = TextEditingController();
+  TextEditingController _note = TextEditingController();
 
-  //Signup Function
-  void signUp() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var url = Uri.parse("http://192.168.137.1:8080/v1/signup");
-    var response = await http.post(url, body: jsonEncode(<String, String>{
-      'email': _emailController.text,
-      'name': _nameContoller.text,
-      "password": _passwordController.text,
-      "phoneNumber": _phoneController.text}),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-    var data = json.decode(response.body);
-    //verify jwt token
-    print('data: $data');
-    if (data['accessToken'] == null) {
+  List<dynamic> province = [];
+  List<dynamic> city = [];
+
+  
+
+  dynamic selectedProvince;
+
+  void getProvince() async {
+    var url = Uri.parse("http://192.168.137.1:8080/v1/province/get");
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+    setState(() {
+      province = data;
+    });
+  }
+
+  void getCityByProvince(String province) async {
+    var url = Uri.parse("http://192.168.137.1:8080/v1/city/${province}");
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+    setState(() {
+      city = data;
+    });
+  }
+
+  void addAddress() async {
+    print(widget.token);
+    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/create");
+    var response = await http.post(url, body: jsonEncode(<String, dynamic>{
+      "address": _address.text,
+      "city": _city.text,
+      "province": _province,
+      "postalCode": _postalCode.text,
+      "note": _note.text,
+      "is_default": true
+    }), headers: {
+      "Content-Type": "application/json",
+      "Authorization": "auth ${widget.token}"
+    });
+
+    var data = jsonDecode(response.body);
+    if(data['message'] == "Addresses created successfully"){
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => BotNavBarPage()),
+          (Route<dynamic> route) => false);
+    }else{
       String message = data['message'] ?? "2";
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(message),
@@ -54,29 +86,19 @@ class _RegisterPageState extends State<RegisterPage> {
       ));
       return;
     }
-    try{
-      final jwt = JWT.verify(data['accessToken'], SecretKey('access_token_secret'));
-      await prefs.setString('isLoggedIn', 'true');
-      await prefs.setString('accessToken', data['accessToken']);
-      final profile = JWT.decode(data['accessToken']);
-      await prefs.setString('id', profile.payload['id']);
-      await prefs.setString('email', profile.payload['email']);
-      await prefs.setString('name', profile.payload['name']);
-      await prefs.setString('phoneNumber', profile.payload['phone_number']);
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => InitAddressPage(idUser: profile.payload['id'], token: data['accessToken'],)));
-    } on JWTExpiredException {
-      print('jwt expired');
-      return;
-    } on JWTException catch (ex) {
-      print(ex.message); // ex: invalid signature
-      return;
-    }
 
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    getProvince();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -88,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Daftar",
+                        "We need your address",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.bold,
@@ -103,27 +125,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Sudah punya akun? ",
+                        "for giving you the best experience",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.normal),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginPage(
-                                        showBottomSheet: false,
-                                      )));
-                        },
-                        child: Text(
-                          "Masuk",
-                          style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.normal,
-                              color: Colors.green.shade700),
-                        ),
                       ),
                     ],
                   ),
@@ -133,7 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Email",
+                        "Your Address",
                         style: TextStyle(
                             fontSize: 15,
                             fontFamily: "Poppins",
@@ -155,7 +160,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _emailController,
+                              controller: _address,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),
@@ -171,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Nama",
+                        "Province",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.normal),
@@ -191,10 +196,22 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: TextField(
-                              controller: _nameContoller,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<dynamic>(
+                                hint: Text("Select Province"),
+                                value: selectedProvince,
+                                items: province.map((item) {
+                                  return DropdownMenuItem<dynamic>(
+                                    child: Text(item['province']),
+                                    value: item['province'],
+                                  );
+                                }).toList(),
+                                onChanged: (dynamic? value) {
+                                  setState(() {
+                                    selectedProvince = value;
+                                    getCityByProvince(value);
+                                  });
+                                },
                               ),
                             ),
                           ),
@@ -209,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Kata Sandi",
+                        "City",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.normal),
@@ -217,7 +234,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ],
                   ),
                 ),
-                
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
                   child: Container(
@@ -231,21 +247,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _passwordController,
-                              obscureText: showPassword,
+                              controller: _city,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),
                             ),
                           ),
-                          InkWell(
-                              onTap: () {
-                                setState(() {
-                                  showPassword = !showPassword;
-                                });
-                              },
-                              child: Icon(Icons.visibility_off,
-                                  color: Colors.grey))
                         ],
                       ),
                     ),
@@ -256,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Konfirmasi Kata Sandi",
+                        "Postal Code",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.normal),
@@ -277,21 +284,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _passwordController2,
-                              obscureText: showPassword2,
+                              controller: _postalCode,
+                              keyboardType: TextInputType.number,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),
                             ),
                           ),
-                          InkWell(
-                              onTap: () {
-                                setState(() {
-                                  showPassword2 = !showPassword2;
-                                });
-                              },
-                              child: Icon(Icons.visibility_off,
-                                  color: Colors.grey))
                         ],
                       ),
                     ),
@@ -302,7 +301,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: Row(
                     children: [
                       Text(
-                        "Nomor Telepon",
+                        "Note\n Ex: Near the bus stop",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.normal),
@@ -323,7 +322,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: _phoneController,
+                              controller: _note,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                               ),
@@ -341,23 +340,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 50,
                     child: TextButton(
                       onPressed: () {
-                        if (_emailController.text.isEmpty ||
-                            _passwordController.text.isEmpty ||
-                            _passwordController2.text.isEmpty) {
+                        if (_address.text.isEmpty ||
+                            _city.text.isEmpty ||
+                            _province.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text("Data tidak boleh kosong"),
                           ));
-                        } else if (_passwordController.text !=
-                            _passwordController2.text) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Password tidak sama"),
-                          ));
-                        } else {
-                          signUp();
+                        }else {
+                          addAddress();
+                          // signUp();
                         }
                       },
                       child: Text(
-                        "Daftar",
+                        "Submit",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 16,

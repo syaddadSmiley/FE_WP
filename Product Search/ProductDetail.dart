@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:waroeng_pangan/Pengiriman%20&%20Pembayaran/PengirimanPage.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  final String? idProduct;
-  const ProductDetailPage({super.key, this.idProduct});
+  final Map? data;
+  const ProductDetailPage({super.key, this.data});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -363,18 +364,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   color: Colors.white,
                 ),
               ),
-              Container(
-                width: 150,
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.green.shade700)),
-                child: Center(
-                  child: Text(
-                    "Beli Sekarang",
-                    style: TextStyle(
-                      color: Colors.green.shade700,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PengirimanPage(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 150,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.green.shade700)),
+                  child: Center(
+                    child: Text(
+                      "Beli Sekarang",
+                      style: TextStyle(
+                        color: Colors.green.shade700,
+                      ),
                     ),
                   ),
                 ),

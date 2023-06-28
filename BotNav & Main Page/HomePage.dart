@@ -3,7 +3,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waroeng_pangan/Login%20&%20Register/InitAddressPage.dart';
+import 'package:waroeng_pangan/Login%20&%20Register/LoginPage.dart';
 import 'package:waroeng_pangan/Product%20Search/ProductPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,6 +25,8 @@ final List<String> imgList = [
 
 class _HomePageState extends State<HomePage> {
   final CarouselController _controller = CarouselController();
+
+  List<dynamic> userAddress = [];
 
   final List<Widget> imageSliders = imgList
       .map((item) => Container(
@@ -43,10 +49,45 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void checkExistingAddress() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(prefs.getString('accessToken'));
+    if (prefs.getString('accessToken') == null) {
+      return;
+    }
+    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/getbyiduser");
+    var response = await http.get(url, 
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'auth ${prefs.getString('accessToken')}',
+      },
+    );
+    var data = jsonDecode(response.body);
+    if (response.body == "null") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => InitAddressPage(token: prefs.getString('accessToken'),)),
+      );
+    }else if (data.runtimeType != List<dynamic>) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage(showBottomSheet: false,)),
+      );
+    } 
+    else {
+      setState(() {
+        userAddress = data;
+      });
+      return;
+    }
+    
+  }
+
   @override
   void initState() {
     _name = "WP User";
     initData();
+    checkExistingAddress();
     // TODO: implement initState
     super.initState();
   }
@@ -61,7 +102,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(children: [
           InkWell(
             onTap: () {
-              showBottomSheet();
+              showBottomSheet(userAddress);
             },
             child: Container(
               height: 30,
@@ -481,7 +522,8 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  void showBottomSheet() {
+  void showBottomSheet(List<dynamic> data) {
+    print(data);
     showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(
@@ -525,7 +567,7 @@ class _HomePageState extends State<HomePage> {
                         width: double.infinity,
                         child: ListView.separated(
                           shrinkWrap: true,
-                          itemCount: 1,
+                          itemCount: data.length,
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (BuildContext context, int index) =>
                               Container(
@@ -542,7 +584,7 @@ class _HomePageState extends State<HomePage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Alamat 1",
+                                  data[index]['label'] ?? "Alamat",
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 14,
@@ -552,7 +594,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 5,
                                 ),
                                 Text(
-                                  "Nanda 0812397451823",
+                                  "",
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 12,
@@ -562,7 +604,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 5,
                                 ),
                                 Text(
-                                  "2WX6+QQG, Jl. Sejahtera, Dayehluhur, Kec. Warudoyong, Kota Sukabumi, Jawa Barat 43134, Indonesia",
+                                  data[index]['address']+", Kota "+data[index]['city']+", Provinsi "+data[index]['province']+", "+data[index]['postal_code']+"\n\n"+"catatan: "+data[index]['note'] ?? "",
                                   style: TextStyle(
                                       fontFamily: "Poppins",
                                       fontSize: 12,

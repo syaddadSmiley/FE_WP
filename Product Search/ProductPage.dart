@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:waroeng_pangan/Product%20Search/ProductDetail.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -15,9 +18,26 @@ class _ProductPageState extends State<ProductPage> {
   @override
   void initState() {
     // TODO: implement initState
+    setState(() {
+      fetchProductData();
+    });
+    
 
     super.initState();
   }
+
+  List<dynamic> _productData = [];
+
+  void fetchProductData() async {
+    var url = Uri.parse('http://192.168.137.1:8080/v1/product/getall');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    print(result);
+    setState(() {
+      _productData = result;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +121,7 @@ class _ProductPageState extends State<ProductPage> {
 
             GridCategory(
               scrollController: rightScrollController,
+              productData: _productData,
             )
           ]),
         ),
@@ -251,69 +272,12 @@ class _ProductPageState extends State<ProductPage> {
 
 class GridCategory extends StatelessWidget {
   final ScrollController scrollController;
+  final List<dynamic> productData;
   GridCategory({
     super.key,
     required this.scrollController,
+    required this.productData,
   });
-
-  final List<Map<String, dynamic>> _productData = [
-    {
-      "id": 1,
-      "name": "Bayam Hijau",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Hijau",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20,
-      "sellerSold": 100,
-    },
-    {
-      "id": 2,
-      "name": "Bayam Merah",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Merah",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20,
-      "sellerSold": 100,
-    },
-    {
-      "id": 3,
-      "name": "Bayam Putih",
-      "image": "assets/images/bayam.jpg",
-      "price": 10000,
-      "rating": 4.5,
-      "description": "Bayam Putih",
-      "category": "Sayuran",
-      "stock": 10,
-      "unit": "kg",
-      "seller": "Toko Sayur",
-      "sellerImage": "assets/images/seller1.jpg",
-      "sellerLocation": "Jl. Raya Kedung Baruk No.98, Surabaya",
-      "sellerRating": 4.5,
-      "sellerTime": "08.00 - 17.00",
-      "sellerProduct": 20},
-      ];
-
-  void fetchProductData() async {
-    
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -321,7 +285,7 @@ class GridCategory extends StatelessWidget {
         controller: scrollController,
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
-        itemCount: 20,
+        itemCount: productData.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.8,
@@ -330,7 +294,14 @@ class GridCategory extends StatelessWidget {
         ),
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                            data: productData[index],
+                          )));
+            },
             child: Container(
               padding: EdgeInsets.all(8),
               // margin: EdgeInsets.all(4),
@@ -360,7 +331,7 @@ class GridCategory extends StatelessWidget {
                   //   height: 70,),
                   SizedBox(height: 15),
                   Text(
-                    "Brokoli Segar Fresh 250gr",
+                    productData[index]['name_product'],
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 14,
@@ -371,7 +342,8 @@ class GridCategory extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Rp. 10.000",
+                      "Rp."+productData[index]['price'].toString(),
+                      semanticsLabel: "Rp. 15.000",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                         fontSize: 12,
