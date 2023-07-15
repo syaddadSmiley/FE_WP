@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   void logIn() async {
     print(_emailController.text);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var url = Uri.parse("http://192.168.137.1:8080/v1/login");
+    var url = Uri.parse("http://192.168.0.123:8080/v1/login");
     var response = await http.post(url, body: jsonEncode(<String, String>{
       "email": _emailController.text,
       "password": _passwordController.text}),

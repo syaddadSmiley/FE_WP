@@ -25,6 +25,67 @@ class InitAddressPage extends StatefulWidget {
   State<InitAddressPage> createState() => _InitAddressPageState();
 }
 
+class Province {
+  final String province_id;
+  final dynamic province;
+
+  Province(this.province_id, this.province);
+
+  Province.fromJson(Map<String, dynamic> json)
+      : province_id = json['province_id'],
+        province = json['province'];
+
+  @override
+  String toString() => province;
+
+  @override
+  bool operator ==(o) =>
+      o is Province && o.province_id == province_id;
+
+  @override
+  int get hashCode => province_id.hashCode ^ province.hashCode;
+}
+
+class City {
+  final dynamic city_id;
+  final dynamic province_id;
+  final dynamic province;
+  final dynamic type;
+  final dynamic city_name;
+  final dynamic postal_code;
+
+  City(this.city_id, this.province_id, this.province, this.type, this.city_name,
+      this.postal_code);
+
+  City.fromJson(Map<String, dynamic> json)
+        : city_id = json['city_id'],
+        province_id = json['province_id'],
+        province = json['province'],
+        type = json['type'],
+        city_name = json['city_name'],
+        postal_code = json['postal_code'];
+
+  @override
+  bool operator ==(o) =>
+      o is City &&
+      o.city_id == city_id &&
+      o.province_id == province_id &&
+      o.province == province &&
+      o.type == type &&
+      o.city_name == city_name &&
+      o.postal_code == postal_code;
+    
+  @override
+  int get hashCode =>
+      city_id.hashCode ^
+      province_id.hashCode ^
+      province.hashCode ^
+      type.hashCode ^
+      city_name.hashCode ^
+      postal_code.hashCode;
+}
+  
+
 class _InitAddressPageState extends State<InitAddressPage> {
   TextEditingController _address = TextEditingController();
   TextEditingController _city = TextEditingController();
@@ -32,34 +93,57 @@ class _InitAddressPageState extends State<InitAddressPage> {
   TextEditingController _postalCode = TextEditingController();
   TextEditingController _note = TextEditingController();
 
-  List<dynamic> province = [];
-  List<dynamic> city = [];
+  List<dynamic> provinceServer = [];
+  List<dynamic> cityServer = [];
 
-  
+  List<Province> province = [];
+  List<City> city = [];
 
-  dynamic selectedProvince;
+  List<DropdownMenuItem<Province>> provinceItem = [];
+  List<DropdownMenuItem<City>> cityItem = [];
+
+  Province? selectedProvince;
+  dynamic selectedCity;
 
   void getProvince() async {
-    var url = Uri.parse("http://192.168.137.1:8080/v1/province/get");
-    var response = await http.get(url);
-    var data = jsonDecode(response.body);
-    setState(() {
-      province = data;
-    });
-  }
+    var url = Uri.parse("http://192.168.0.123:8080/v1/province/get");
+  var response = await http.get(url);
+  var data = jsonDecode(response.body);
+  setState(() {
+    provinceServer = data;
+    province = provinceServer.map((e) => Province.fromJson(e)).toList();
+    provinceItem = province
+        .map((e) => DropdownMenuItem<Province>(
+              key: UniqueKey(), // Add a unique key based on the province value
+              value: e,
+              child: Text(e.province),
+            ))
+        .toList();
+  });
+}
 
-  void getCityByProvince(String province) async {
-    var url = Uri.parse("http://192.168.137.1:8080/v1/city/${province}");
+  void getCityByProvince(dynamic province) async {
+    var url = Uri.parse("http://192.168.0.123:8080/v1/city/get/${province.province_id}");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
+    var uniqueCities = data.toSet().toList();
+
     setState(() {
-      city = data;
+      cityServer = uniqueCities;
+      city = cityServer.map((e) => City.fromJson(e)).toList();
+      cityItem = city
+          .map((e) => DropdownMenuItem(
+                key: UniqueKey(),
+                child: Text(e.city_name),
+                value: e,
+              ))
+          .toList();
     });
   }
 
   void addAddress() async {
     print(widget.token);
-    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/create");
+    var url = Uri.parse("http://192.168.0.123:8080/v1/addresses/create");
     var response = await http.post(url, body: jsonEncode(<String, dynamic>{
       "address": _address.text,
       "city": _city.text,
@@ -92,8 +176,9 @@ class _InitAddressPageState extends State<InitAddressPage> {
   @override
   void initState() {
     // TODO: implement initState
-    getProvince();
     super.initState();
+    getProvince();
+    
   }
 
   @override
@@ -196,23 +281,22 @@ class _InitAddressPageState extends State<InitAddressPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<dynamic>(
-                                hint: Text("Select Province"),
-                                value: selectedProvince,
-                                items: province.map((item) {
-                                  return DropdownMenuItem<dynamic>(
-                                    child: Text(item['province']),
-                                    value: item['province'],
-                                  );
-                                }).toList(),
-                                onChanged: (dynamic? value) {
-                                  setState(() {
-                                    selectedProvince = value;
-                                    getCityByProvince(value);
-                                  });
-                                },
+                            child: DropdownButtonFormField<Province>(
+                              decoration: InputDecoration(
+                                labelText: 'Select Province',
+                                border: OutlineInputBorder(),
                               ),
+                              value: selectedProvince,
+                              items: provinceItem,
+                              onChanged: (Province? value) {
+                                print('Selected Province: $value');
+                                setState(() {
+                                  selectedProvince = value;
+                                  if (value != null) {
+                                    getCityByProvince(value.province_id);
+                                  }
+                                });
+                              },
                             ),
                           ),
                         ],
@@ -246,11 +330,18 @@ class _InitAddressPageState extends State<InitAddressPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: TextField(
-                              controller: _city,
+                            child: DropdownButtonFormField<City>(
                               decoration: InputDecoration(
-                                border: InputBorder.none,
+                                labelText: 'Select City',
+                                border: OutlineInputBorder(),
                               ),
+                              value: selectedCity,
+                              items: cityItem,
+                              onChanged: (City? value) {
+                                setState(() {
+                                  selectedCity = value;
+                                });
+                              },
                             ),
                           ),
                         ],

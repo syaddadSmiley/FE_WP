@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     if (prefs.getString('accessToken') == null) {
       return;
     }
-    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/getbyiduser");
+    var url = Uri.parse("http://192.168.0.123:8080/v1/addresses/getbyiduser");
     var response = await http.get(url, 
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',

@@ -26,10 +26,23 @@ class _ProductPageState extends State<ProductPage> {
     super.initState();
   }
 
+  // class DataProduct {
+  //   final String nameProduct;
+  //   final String price;
+  //   final String descriptionProduct;
+  //   final String image;
+
+  //   DataProduct(
+  //       {required this.name,
+  //       required this.price,
+  //       required this.discount,
+  //       required this.image});
+  // }
+
   List<dynamic> _productData = [];
 
   void fetchProductData() async {
-    var url = Uri.parse('http://192.168.137.1:8080/v1/product/getall');
+    var url = Uri.parse('http://192.168.0.123:8080/v1/product/getall');
     var response = await http.get(url);
     var result = json.decode(response.body);
     print(result);
