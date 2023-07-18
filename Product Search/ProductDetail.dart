@@ -7,7 +7,9 @@ import 'package:waroeng_pangan/Pengiriman%20&%20Pembayaran/PengirimanPage.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Map? data;
-  const ProductDetailPage({super.key, this.data});
+  final dynamic selectedCity;
+  final dynamic address;
+  const ProductDetailPage({super.key, required this.data, required this.selectedCity, required this.address});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -366,10 +368,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               InkWell(
                 onTap: () {
+                  print(widget.data);
+                  print(widget.address);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PengirimanPage(),
+                      builder: (context) => PengirimanPage(productItem: [widget.data], selectedCity: widget.selectedCity, address: widget.address,)
                     ),
                   );
                 },

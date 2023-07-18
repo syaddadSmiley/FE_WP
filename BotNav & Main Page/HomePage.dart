@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   final CarouselController _controller = CarouselController();
 
   List<dynamic> userAddress = [];
+  dynamic selectedAddress = {};
 
   final List<Widget> imageSliders = imgList
       .map((item) => Container(
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
     if (prefs.getString('accessToken') == null) {
       return;
     }
-    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/getbyiduser");
+    var url = Uri.parse("http://192.168.0.203:8080/v1/addresses/getbyiduser");
     var response = await http.get(url, 
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -77,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     else {
       setState(() {
         userAddress = data;
+        selectedAddress = userAddress.firstWhere((element) => element['is_default'] == true);
       });
       return;
     }
@@ -262,7 +264,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProductPage())
+                              builder: (context) => ProductPage(address: selectedAddress,))
                         );
                       },
                       child:  Text(

@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:waroeng_pangan/Product%20Search/ProductDetail.dart';
 
 class ProductPage extends StatefulWidget {
-  const ProductPage({super.key});
+  final dynamic address;
+  const ProductPage({super.key, required this.address});
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -14,12 +15,14 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   final rightScrollController = ScrollController();
+  dynamic address;
 
   @override
   void initState() {
     // TODO: implement initState
     setState(() {
-      fetchProductData();
+      address = widget.address;
+      fetchProductData(widget.address['city']);
     });
     
 
@@ -28,8 +31,8 @@ class _ProductPageState extends State<ProductPage> {
 
   List<dynamic> _productData = [];
 
-  void fetchProductData() async {
-    var url = Uri.parse('http://192.168.137.1:8080/v1/product/getall');
+  void fetchProductData(String city) async {
+    var url = Uri.parse('http://192.168.0.203:8080/v1/product/getbycity/?city=${city}');
     var response = await http.get(url);
     var result = json.decode(response.body);
     print(result);
@@ -122,6 +125,8 @@ class _ProductPageState extends State<ProductPage> {
             GridCategory(
               scrollController: rightScrollController,
               productData: _productData,
+              selectedCity: widget.address['city'],
+              address: address,
             )
           ]),
         ),
@@ -273,10 +278,14 @@ class _ProductPageState extends State<ProductPage> {
 class GridCategory extends StatelessWidget {
   final ScrollController scrollController;
   final List<dynamic> productData;
+  final String? selectedCity;
+  final dynamic address;
   GridCategory({
     super.key,
     required this.scrollController,
     required this.productData,
+    required this.selectedCity,
+    required this.address,
   });
 
   @override
@@ -295,11 +304,14 @@ class GridCategory extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
+              print(address);
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => ProductDetailPage(
                             data: productData[index],
+                            selectedCity: selectedCity,
+                            address: address,
                           )));
             },
             child: Container(

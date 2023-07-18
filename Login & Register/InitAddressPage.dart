@@ -34,13 +34,13 @@ class _InitAddressPageState extends State<InitAddressPage> {
 
   List<dynamic> province = [];
   List<dynamic> city = [];
-
   
 
   dynamic selectedProvince;
+  dynamic selectedCity;
 
   void getProvince() async {
-    var url = Uri.parse("http://192.168.137.1:8080/v1/province/get");
+    var url = Uri.parse("http://192.168.0.203:8080/v1/province/get");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     setState(() {
@@ -48,8 +48,10 @@ class _InitAddressPageState extends State<InitAddressPage> {
     });
   }
 
-  void getCityByProvince(String province) async {
-    var url = Uri.parse("http://192.168.137.1:8080/v1/city/${province}");
+  void getCityByProvince(String provinceParam) async {
+    //find province id by province
+    var provinceId = province.firstWhere((element) => element['province'] == provinceParam)['province_id'];
+    var url = Uri.parse("http://192.168.0.203:8080/v1/city/get/${provinceId}");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     setState(() {
@@ -59,12 +61,12 @@ class _InitAddressPageState extends State<InitAddressPage> {
 
   void addAddress() async {
     print(widget.token);
-    var url = Uri.parse("http://192.168.137.1:8080/v1/addresses/create");
+    var url = Uri.parse("http://192.168.0.203:8080/v1/addresses/create");
     var response = await http.post(url, body: jsonEncode(<String, dynamic>{
       "address": _address.text,
-      "city": _city.text,
-      "province": _province,
-      "postalCode": _postalCode.text,
+      "city": selectedCity,
+      "province": selectedProvince,
+      "postal_code": _postalCode.text,
       "note": _note.text,
       "is_default": true
     }), headers: {
@@ -208,6 +210,7 @@ class _InitAddressPageState extends State<InitAddressPage> {
                                 }).toList(),
                                 onChanged: (dynamic? value) {
                                   setState(() {
+                                    selectedCity = null;
                                     selectedProvince = value;
                                     getCityByProvince(value);
                                   });
@@ -246,10 +249,21 @@ class _InitAddressPageState extends State<InitAddressPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: TextField(
-                              controller: _city,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<dynamic>(
+                                hint: Text("Select City"),
+                                value: selectedCity,
+                                items: city.map((item) {
+                                  return DropdownMenuItem<dynamic>(
+                                    child: Text(item['city_name']),
+                                    value: item['city_name'],
+                                  );
+                                }).toList(),
+                                onChanged: (dynamic? value) {
+                                  setState(() {
+                                    selectedCity = value;
+                                  });
+                                },
                               ),
                             ),
                           ),
@@ -341,8 +355,8 @@ class _InitAddressPageState extends State<InitAddressPage> {
                     child: TextButton(
                       onPressed: () {
                         if (_address.text.isEmpty ||
-                            _city.text.isEmpty ||
-                            _province.text.isEmpty) {
+                            selectedCity == null ||
+                            selectedProvince == null) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text("Data tidak boleh kosong"),
                           ));

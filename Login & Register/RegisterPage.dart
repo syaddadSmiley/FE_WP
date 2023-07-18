@@ -33,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
   //Signup Function
   void signUp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var url = Uri.parse("http://192.168.137.1:8080/v1/signup");
+    var url = Uri.parse("http://192.168.0.203:8080/v1/signup");
     var response = await http.post(url, body: jsonEncode(<String, String>{
       'email': _emailController.text,
       'name': _nameContoller.text,
