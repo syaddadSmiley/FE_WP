@@ -1,17 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'PembayaranPage.dart';
 
 class PengirimanPage extends StatefulWidget {
-  const PengirimanPage({super.key});
+  final List<dynamic> productItem;
+  final selectedCity;
+  final dynamic address;
+  const PengirimanPage({super.key, required this.productItem, required this.selectedCity, required this.address});
 
   @override
   State<PengirimanPage> createState() => _PengirimanPageState();
 }
 
 class _PengirimanPageState extends State<PengirimanPage> {
+
+  List<dynamic> productItem = [];
+  List<dynamic> serviceItem = [];
+  
+  String selectedCity = "";
+
+  String selectedService = "";
+  String selectedServiceMethod = "";
+  String selectedServiceCost = "0";
+  String selectedServiceEstimation = "";
+  String selectedServiceDescription = "";
+  
+  int totalPrice = 0;
+  int totalPriceProduct = 0;
+
+  // Future<void> createOrder() async {
+  //   var url = Uri.parse('http://
+
+  Future<void> getServiceCourier() async {
+    int totalWeight = 0;
+    for (var i = 0; i < productItem.length; i++) {
+      totalWeight += int.parse(productItem[i]['unit_type_value']);
+    }
+    var url = Uri.parse('http://192.168.0.203:8080/v1/courier/getservice');
+    var response = await http.post(url, body: jsonEncode(<String, dynamic>{
+      "city": selectedCity,
+      "weight": totalWeight,
+      "courier": "jne"
+    }), headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    });
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      setState(() {
+        selectedService = data['code'];
+        serviceItem = data['costs'];
+      });
+    } else {
+      print('Request failed with status: ${response.body}.');
+    }
+  }
+
+  @override
+  void initState() {
+    for (var i = 0; i < widget.productItem.length; i++) {
+      totalPriceProduct += int.parse(widget.productItem[i]['price']);
+    }
+    // TODO: implement initState
+    setState(() {
+      totalPriceProduct = totalPriceProduct;
+      totalPrice = totalPriceProduct + int.parse(selectedServiceCost);
+      productItem = widget.productItem;
+      selectedCity = widget.selectedCity;
+      getServiceCourier();
+      
+    });
+    super.initState();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,7 +197,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                               IntrinsicHeight(
                                 child: Row(
                                   children: [
-                                    Text("Kota Blitar"),
+                                    Text(widget.selectedCity ?? "Kota ....."),
                                     SizedBox(width: 4),
                                     VerticalDivider(
                                       color: Colors.black,
@@ -165,7 +229,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                           padding: EdgeInsets.all(8),
                           height: 350,
                           child: ListView.separated(
-                            itemCount: 4,
+                            itemCount: 1,
                             itemBuilder: (context, index) {
                               return Row(
                                 children: [
@@ -189,7 +253,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                                       SizedBox(
                                         width: 200,
                                         child: Text(
-                                          "Beras MerahBeras MerahBeras MerahBeras Merah",
+                                          productItem[index]["name_product"] ?? "Nama Produk",
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -199,7 +263,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                                       ),
                                       SizedBox(height: 8),
                                       Text(
-                                        '1 Barang (1kg)',
+                                        "1 "+productItem[index]["unit_type_name"],
                                         style: TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.w300,
@@ -207,7 +271,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                                       ),
                                       SizedBox(height: 8),
                                       Text(
-                                        'Rp. 10.000',
+                                        "Rp."+productItem[index]["price"],
                                         style: TextStyle(
                                             color: Colors.green.shade800,
                                             fontWeight: FontWeight.bold),
@@ -238,19 +302,24 @@ class _PengirimanPageState extends State<PengirimanPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Next Day",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: Colors.black,
-                          )
-                        ],
+                      InkWell(
+                        onTap: () {
+                          showBottomSheetService(serviceItem);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(selectedService.toUpperCase(),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold)),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 14,
+                              color: Colors.black,
+                            )
+                          ],
+                        ),
                       ),
                       SizedBox(height: 4),
                       Divider(
@@ -264,9 +333,13 @@ class _PengirimanPageState extends State<PengirimanPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("SiCepat (Rp. 2.500)"),
+                              Text("$selectedServiceMethod - Rp. $selectedServiceCost",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  )),
                               SizedBox(height: 8),
-                              Text("Estimasi tiba besok - 2 hari",
+                              Text("Estimasi tiba "+ selectedServiceEstimation+" hari",
                                   style: TextStyle(
                                     color: Colors.grey.shade500,
                                   )),
@@ -312,7 +385,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                       Text("Total ",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text("Rp10.000",
+                      Text("Rp. $totalPrice",
                           style: TextStyle(
                               fontSize: 16,
                               color: Colors.green,
@@ -333,10 +406,11 @@ class _PengirimanPageState extends State<PengirimanPage> {
               Spacer(),
               InkWell(
                 onTap: () {
+                  print(widget.address);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => PembayaranPage()));
+                          builder: (context) => PembayaranPage(productItem: productItem, totalHarga: totalPrice, deliveryFee: selectedServiceCost, itemFee: totalPriceProduct, selectedDelivery: selectedService, selectedDeliveryMethod: selectedServiceMethod, selectedDeliveryEstimation: selectedServiceEstimation, selectedDeliveryDescription: selectedServiceDescription, address: widget.address,)));
                 },
                 child: Container(
                   width: 200,
@@ -346,18 +420,156 @@ class _PengirimanPageState extends State<PengirimanPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
-                    child: Text(
-                      "Pembayaran",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16),
+                    child:  Text(
+                        "Pembayaran",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
                     ),
                   ),
                 ),
-              )
             ],
           ),
         ));
+  }
+
+  void showBottomSheetService(List<dynamic> serviceItem) {
+    showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(40), topRight: Radius.circular(40))),
+        builder: (builder) {
+          return Container(
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(40),
+                      topRight: Radius.circular(40))),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 50),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Pilih Pengiriman",
+                        style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Yuk atur pengiriman kamu terlebih dahulu sebelum lanjut berbelanja",
+                      style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: Container(
+                        height: 180,
+                        width: double.infinity,
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: serviceItem.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (BuildContext context, int index) =>
+                              Container(
+                            height: 120,
+                            width: 180,
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border:
+                                    Border.all(color: Colors.green.shade700)),
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  totalPrice -= int.parse(selectedServiceCost);
+                                  selectedServiceMethod = serviceItem[index]["service"].toString();
+                                  selectedServiceCost = serviceItem[index]["cost"][0]['value'].toString();
+                                  selectedServiceEstimation = serviceItem[index]["cost"][0]['etd'].toString();
+                                  totalPrice += int.parse(selectedServiceCost);
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "JNE"+" ("+serviceItem[index]["service"].toString()+")",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    serviceItem[index]["description"].toString(),
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    "Rp. "+serviceItem[index]["cost"][0]['value'].toString() + "\nPerkiraan sampai : " + serviceItem[index]["cost"][0]['etd'].toString()+" hari",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          separatorBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              height: 10,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "Lanjut",
+                            style: TextStyle(
+                                fontFamily: "Poppins",
+                                fontSize: 16,
+                                color: Colors.white),
+                          ),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.green.shade700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ));
+        });
   }
 }
