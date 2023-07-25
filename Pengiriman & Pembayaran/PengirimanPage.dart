@@ -30,6 +30,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
   
   int totalPrice = 0;
   int totalPriceProduct = 0;
+  List<String> totalQuantity = [];
 
   // Future<void> createOrder() async {
   //   var url = Uri.parse('http://
@@ -39,7 +40,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
     for (var i = 0; i < productItem.length; i++) {
       totalWeight += int.parse(productItem[i]['unit_type_value']);
     }
-    var url = Uri.parse('http://192.168.0.203:8080/v1/courier/getservice');
+    var url = Uri.parse('http://192.168.0.123:8080/v1/courier/getservice');
     var response = await http.post(url, body: jsonEncode(<String, dynamic>{
       "city": selectedCity,
       "weight": totalWeight,
@@ -63,6 +64,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
   void initState() {
     for (var i = 0; i < widget.productItem.length; i++) {
       totalPriceProduct += int.parse(widget.productItem[i]['price']);
+      totalQuantity.add("1");
     }
     // TODO: implement initState
     setState(() {
@@ -262,12 +264,66 @@ class _PengirimanPageState extends State<PengirimanPage> {
                                         ),
                                       ),
                                       SizedBox(height: 8),
-                                      Text(
-                                        "1 "+productItem[index]["unit_type_name"],
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.w300,
-                                        ),
+                                      Row(
+
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(3),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(5),
+                                                color: Theme.of(context).accentColor),
+                                            child: Row(
+                                              children: [
+                                                InkWell(
+                                                    onTap: () {
+                                                        setState(() {
+                                                          totalPrice -= int.parse(productItem[index]["price"]);
+                                                          totalPriceProduct -= int.parse(productItem[index]["price"]);
+                                                          totalQuantity[index] = (int.parse(totalQuantity[index]) - 1).toString();
+                                                        });//convert to int
+                                                      },
+                                                      child: Icon(
+                                                        Icons.remove,
+                                                        color: Colors.white,
+                                                        size: 14,
+                                                      )),
+                                                  Container(
+                                                    margin: EdgeInsets.symmetric(horizontal: 3),
+                                                    padding:
+                                                        EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(3),
+                                                        color: Colors.white),
+                                                    child: Text(
+                                                      totalQuantity[index],
+                                                      style: TextStyle(color: Colors.black, fontSize: 14),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          totalPrice += int.parse(productItem[index]["price"]);
+                                                          totalPriceProduct += int.parse(productItem[index]["price"]);
+                                                          totalQuantity[index] = (int.parse(totalQuantity[index]) + 1).toString();
+                                                        });
+                                                      },
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        color: Colors.white,
+                                                        size: 14,
+                                                      )),
+                                                ],
+                                              ),
+                                            ),
+                                          Text(
+                                            " "+productItem[index]["unit_type_name"].toUpperCase(),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                          SizedBox(width: 8),
+                                        ],
                                       ),
                                       SizedBox(height: 8),
                                       Text(
@@ -410,7 +466,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => PembayaranPage(productItem: productItem, totalHarga: totalPrice, deliveryFee: selectedServiceCost, itemFee: totalPriceProduct, selectedDelivery: selectedService, selectedDeliveryMethod: selectedServiceMethod, selectedDeliveryEstimation: selectedServiceEstimation, selectedDeliveryDescription: selectedServiceDescription, address: widget.address,)));
+                          builder: (context) => PembayaranPage(productItem: productItem, totalHarga: totalPrice, deliveryFee: selectedServiceCost, itemFee: totalPriceProduct, selectedDelivery: selectedService, selectedDeliveryMethod: selectedServiceMethod, selectedDeliveryEstimation: selectedServiceEstimation, selectedDeliveryDescription: selectedServiceDescription, address: widget.address, totalQuantity: totalQuantity,)));
                 },
                 child: Container(
                   width: 200,

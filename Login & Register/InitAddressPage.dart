@@ -36,37 +36,94 @@ class _InitAddressPageState extends State<InitAddressPage> {
   List<dynamic> province = [];
   List<dynamic> city = [];
   
+  List provinceName = [];
+  List cityName = [];
 
   dynamic selectedProvince;
   dynamic selectedCity;
 
+  void showPopupProvince(BuildContext context, List<dynamic> provinceName) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Pilih Provinsi"),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: provinceName.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(provinceName[index]),
+                  onTap: () {
+                    setState(() {
+                      selectedProvince = provinceName[index];
+                      getCityByProvince(selectedProvince);
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      });
+    }
+
+    void showDialogCity(BuildContext context, List<dynamic> cityName) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Pilih Kota"),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: cityName.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(cityName[index]),
+                  onTap: () {
+                    setState(() {
+                      selectedCity = cityName[index];
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      });
+    }
+
   void getProvince() async {
-    var url = Uri.parse("http://192.168.0.203:8080/v1/province/get");
+    var url = Uri.parse("http://192.168.0.123:8080/v1/province/get");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
+    print(data);
     setState(() {
       province = data;
+      for (var i=0; i< province.length; i++){
+        provinceName.add(province[i]['province']);
+      }
     });
   }
 
   void getCityByProvince(String provinceParam) async {
     //find province id by province
     var provinceId = province.firstWhere((element) => element['province'] == provinceParam)['province_id'];
-    var url = Uri.parse("http://192.168.0.203:8080/v1/city/get/${provinceId}");
+    var url = Uri.parse("http://192.168.0.123:8080/v1/city/get/${provinceId}");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
-    var uniqueCities = data.toSet().toList();
 
     setState(() {
-      cityServer = uniqueCities;
-      city = cityServer.map((e) => City.fromJson(e)).toList();
-      cityItem = city
-          .map((e) => DropdownMenuItem(
-                key: UniqueKey(),
-                child: Text(e.city_name),
-                value: e,
-              ))
-          .toList();
+      city = data;
+      for (var i=0; i< city.length; i++){
+        cityName.add(city[i]['city_name']);
+      }
     });
   }
 
@@ -210,25 +267,12 @@ class _InitAddressPageState extends State<InitAddressPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<dynamic>(
-                                hint: Text("Select Province"),
-                                value: selectedProvince,
-                                items: province.map((item) {
-                                  return DropdownMenuItem<dynamic>(
-                                    child: Text(item['province']),
-                                    value: item['province'],
-                                  );
-                                }).toList(),
-                                onChanged: (dynamic? value) {
-                                  setState(() {
-                                    selectedCity = null;
-                                    selectedProvince = value;
-                                    getCityByProvince(value);
-                                  });
-                                },
-                              ),
-                            ),
+                            child: InkWell(
+                              child: Text(selectedProvince ?? "Select Province"),
+                              onTap: () {
+                                showPopupProvince(context, provinceName);
+                              },
+                            )
                           ),
                         ],
                       ),
@@ -261,23 +305,12 @@ class _InitAddressPageState extends State<InitAddressPage> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<dynamic>(
-                                hint: Text("Select City"),
-                                value: selectedCity,
-                                items: city.map((item) {
-                                  return DropdownMenuItem<dynamic>(
-                                    child: Text(item['city_name']),
-                                    value: item['city_name'],
-                                  );
-                                }).toList(),
-                                onChanged: (dynamic? value) {
-                                  setState(() {
-                                    selectedCity = value;
-                                  });
-                                },
-                              ),
-                            ),
+                            child: InkWell(
+                              child: Text(selectedCity ?? "Select City"),
+                              onTap: () {
+                                showDialogCity(context, cityName);
+                              },
+                            )
                           ),
                         ],
                       ),
@@ -449,3 +482,4 @@ class footerPolicy extends StatelessWidget {
     );
   }
 }
+

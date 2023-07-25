@@ -1,10 +1,15 @@
 import 'dart:collection';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'PembayaranLanjutanPage.dart';
+//import http
+import 'package:http/http.dart' as http;
 
 class PembayaranPage extends StatefulWidget {
   final List<dynamic> productItem;
@@ -16,13 +21,123 @@ class PembayaranPage extends StatefulWidget {
   final selectedDeliveryMethod;
   final selectedDeliveryEstimation;
   final selectedDeliveryDescription;
-  const PembayaranPage({super.key, required this.productItem, required this.address, required this.totalHarga, required this.deliveryFee, required this.itemFee ,required this.selectedDelivery, required this.selectedDeliveryMethod, required this.selectedDeliveryEstimation, required this.selectedDeliveryDescription});
+  final totalQuantity;
+  const PembayaranPage({super.key, required this.productItem, required this.address, required this.totalHarga, required this.deliveryFee, required this.itemFee ,required this.selectedDelivery, required this.selectedDeliveryMethod, required this.selectedDeliveryEstimation, required this.selectedDeliveryDescription, required this.totalQuantity});
 
   @override
   State<PembayaranPage> createState() => _PembayaranPageState();
 }
 
 class _PembayaranPageState extends State<PembayaranPage> {
+  List<dynamic> orderItemRequest = [];
+  Map<dynamic, dynamic> orderRequest = {};
+
+  void createCourierService() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final id_address = prefs.getString('address');
+    final token = prefs.getString('accessToken');
+    print(id_address);
+    var url = Uri.parse('http://192.168.0.123:8080/v1/courier_service/create');
+    var response = await http.post(url, body: jsonEncode(<String, dynamic>{
+      "id_courier" : "6c4a09fc-16e0-11ee-bd5c-34e12d347d95",
+      "id_address" : id_address,
+      "service_name" : widget.selectedDeliveryMethod,
+      "description" : widget.selectedDeliveryDescription,
+      "estimation" : widget.selectedDeliveryEstimation,
+      "price_service" : widget.deliveryFee,
+    }), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'basic ' + token!,
+    }
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var id_courier_service = jsonDecode(response.body)["data"];
+      createOrder(id_courier_service);
+    } else {
+      print(response.body);
+    }
+  }
+
+  void createOrder(dynamic id_courier_service) async {
+    orderItemRequest = [];
+    for (var i = 0; i < widget.productItem.length; i++) {
+      orderItemRequest.add({
+        "id_product": widget.productItem[i]["id"],
+        "quantity": widget.totalQuantity[i].toString(),
+        "price": widget.productItem[i]["price"],
+      });
+    }
+
+    orderItemRequest.add({
+      "id_product" : widget.productItem[0]["id"],
+      "quantity" : "1",
+      "price" : widget.deliveryFee,
+    });
+
+    orderRequest = {
+      "id_courier_service": id_courier_service,
+      "id_address": widget.address["id"],
+      "total_price": widget.totalHarga.toString(),
+      "order_items": orderItemRequest,
+    };
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('accessToken')!;
+
+    var url = Uri.parse("http://192.168.0.123:8080/v1/order");
+    var response= await http.post(url, body: jsonEncode(orderRequest), headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'basic ' + token,
+    });
+    print(jsonEncode(orderRequest));
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print(response.body);
+      var redirect_url = jsonDecode(response.body)["redirect_url"];
+      //show pop up
+      _launchUrl(Uri.parse(redirect_url));
+    } else {
+      print(response.body);
+    }
+
+  }
+
+  Future<void> _launchUrl(url) async {
+
+    if (await canLaunchUrl(Uri.parse(url))) {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  } else {
+    throw 'Could not launch $url';
+  }
+
+  }
+
+  showDialogPembayaran(BuildContext context, dynamic data) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Pembayaran"),
+            content: Text(
+                "Pembayaran anda akan diarahkan ke website pembayaran Midtrans"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Batal")),
+              TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    createCourierService();
+                  },
+                  child: Text("Lanjut"))
+            ],
+          );
+        });
+  }
+
   Map<String, dynamic> data = {
     "productItem": [],
     "address": {},
@@ -50,6 +165,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
     });
     print(data);  
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -373,34 +489,5 @@ class _PembayaranPageState extends State<PembayaranPage> {
             ],
           ),
         ));
-  }
-
-  showDialogPembayaran(BuildContext context, dynamic data) {
-    var url = Uri.parse('https://api.sandbox.midtrans.com/v2/charge');
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Pembayaran"),
-            content: Text(
-                "Pembayaran anda akan diarahkan ke website pembayaran Midtrans"),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text("Batal")),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => PembayaranLanjutanPage()));
-                  },
-                  child: Text("Lanjut"))
-            ],
-          );
-        });
   }
 }

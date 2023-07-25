@@ -45,7 +45,7 @@ class _ProductPageState extends State<ProductPage> {
   List<dynamic> _productData = [];
 
   void fetchProductData(String city) async {
-    var url = Uri.parse('http://192.168.0.203:8080/v1/product/getbycity/?city=${city}');
+    var url = Uri.parse('http://192.168.0.123:8080/v1/product/getbycity/?city=${city}');
     var response = await http.get(url);
     var result = json.decode(response.body);
     print(result);

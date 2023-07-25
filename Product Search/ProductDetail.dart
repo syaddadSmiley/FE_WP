@@ -402,10 +402,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
-                  child: Text(
-                    "Tambah",
-                    style: TextStyle(
-                      color: Colors.white,
+                  child: InkWell(
+                    onTap:() {
+                      print(widget.data);
+                    },
+                    child: Text(
+                      "Tambah",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

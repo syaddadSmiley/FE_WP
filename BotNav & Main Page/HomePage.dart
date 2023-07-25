@@ -56,11 +56,8 @@ class _HomePageState extends State<HomePage> {
     if (prefs.getString('accessToken') == null) {
       return;
     }
-<<<<<<< HEAD
+    
     var url = Uri.parse("http://192.168.0.123:8080/v1/addresses/getbyiduser");
-=======
-    var url = Uri.parse("http://192.168.0.203:8080/v1/addresses/getbyiduser");
->>>>>>> 841e574ac72bf1dab087b405d7f0386ef6b8298c
     var response = await http.get(url, 
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -68,6 +65,7 @@ class _HomePageState extends State<HomePage> {
       },
     );
     var data = jsonDecode(response.body);
+    print(data);
     if (response.body == "null") {
       Navigator.push(
         context,
@@ -83,6 +81,9 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         userAddress = data;
         selectedAddress = userAddress.firstWhere((element) => element['is_default'] == true);
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('address', selectedAddress["id"]);
+        });
       });
       return;
     }
