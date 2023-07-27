@@ -1,6 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:waroeng_pangan/Login%20&%20Register/InitAddressPage.dart';
+import 'package:waroeng_pangan/Login%20&%20Register/LoginPage.dart';
+import 'package:waroeng_pangan/Product%20Search/ProductDetail.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -10,32 +16,102 @@ class CategoryPage extends StatefulWidget {
 }
 
 class _CategoryPageState extends State<CategoryPage> {
+  List<dynamic> _address = [];
+  dynamic selectedAddress;
   final List<Map<String, dynamic>> categories = [
     {
-      'title': 'Fruit',
+      'title': 'Buah',
       'icon': Icons.local_florist,
     },
     {
-      'title': 'Vegetables',
+      'title': 'Sayuran',
       'icon': Icons.local_offer,
     },
     {
-      'title': 'Chicken and Egg',
+      'title': 'Unggas dan Telur',
       'icon': Icons.fastfood,
     },
     {
-      'title': 'Fish',
+      'title': 'Ikan',
       'icon': Icons.bubble_chart,
     },
     {
-      'title': 'Groceries',
-      'icon': Icons.shopping_basket,
+      'title': 'Prasarana',
+      'icon': Icons.shopping_bag,
     },
   ];
   final itemsRight = List.generate(20, (index) => 'Right Item ${index + 1}');
   final leftScrollController = ScrollController();
   final rightScrollController = ScrollController();
-  String _selectedCategory = 'Fruit';
+  String _selectedCategory = 'Buah';
+
+  List<dynamic> _productData = [];
+
+  void checkExistingAddress() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(prefs.getString('accessToken'));
+    if (prefs.getString('accessToken') == null) {
+      return;
+    }
+    
+    var url = Uri.parse("http://192.168.0.123:8080/v1/addresses/getbyiduser");
+    var response = await http.get(url, 
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'auth ${prefs.getString('accessToken')}',
+      },
+    );
+    var data = jsonDecode(response.body);
+    print(data);
+    if (response.body == "null") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => InitAddressPage(token: prefs.getString('accessToken'),)),
+      );
+    }else if (data.runtimeType != List<dynamic>) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage(showBottomSheet: false,)),
+      );
+    } 
+    else {
+      setState(() {
+        _address = data;
+        selectedAddress = _address.firstWhere((element) => element['is_default'] == true);
+        fetchProductDatabyCategory(selectedAddress["city"], _selectedCategory);
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('address', selectedAddress["id"]);
+          prefs.setString('addressCity', selectedAddress["city"]);
+        });
+      });
+      
+      return;
+    }
+  }
+ 
+
+  void fetchProductDatabyCategory(String city, String category) async {
+    var url = Uri.parse('http://192.168.0.123:8080/v1/product/getbycategory/?city=${city}&category=${category}');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    print(result);
+    setState(() {
+      if (result == null) {
+        _productData = [];
+      }else{
+        _productData = result;
+      }
+      
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+      checkExistingAddress();
+      
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +149,7 @@ class _CategoryPageState extends State<CategoryPage> {
                               // TODO: Handle the category tap.
                               setState(() {
                                 _selectedCategory = categories[index]['title'];
+                                fetchProductDatabyCategory(selectedAddress["city"], _selectedCategory);
                               });
                               print('Selected category: $_selectedCategory');
                             },
@@ -124,6 +201,9 @@ class _CategoryPageState extends State<CategoryPage> {
                         child: GridCategory(
                           scrollController: rightScrollController,
                           ca: _selectedCategory,
+                          data: _productData,
+                          selectedCity: selectedAddress["city"]!,
+                          address: selectedAddress,
                         )),
                   ),
                 ],
@@ -139,10 +219,16 @@ class _CategoryPageState extends State<CategoryPage> {
 class GridCategory extends StatelessWidget {
   final ScrollController scrollController;
   final String ca;
+  final List<dynamic> data;
+  final String selectedCity;
+  final dynamic address;
   const GridCategory({
     super.key,
     required this.scrollController,
     required this.ca,
+    required this.data,
+    required this.selectedCity,
+    required this.address,
   });
 
   @override
@@ -151,7 +237,7 @@ class GridCategory extends StatelessWidget {
         scrollDirection: Axis.vertical,
         controller: scrollController,
         shrinkWrap: true,
-        itemCount: 20,
+        itemCount: data.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.8,
@@ -159,7 +245,16 @@ class GridCategory extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           return Card(
               child: InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                            data: data[index],
+                            selectedCity: selectedCity,
+                            address: address,
+                          )));
+            },
             child: Container(
               padding: EdgeInsets.all(16),
               child: Column(
@@ -184,7 +279,16 @@ class GridCategory extends StatelessWidget {
                   //   height: 70,),
                   SizedBox(height: 15),
                   Text(
-                    ca,
+                    data[index]["name_product"],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.green,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Rp. ${data[index]["price"]}',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,

@@ -95,7 +95,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          "Brokoli Segar Fresh",
+                          widget.data!["name_product"],
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
@@ -113,7 +113,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           height: 8,
                         ),
                         Text(
-                          "Rp 20.000",
+                          "Rp 0",
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -132,7 +132,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                         Column(
                           children: [
-                            Text("49%",
+                            Text("0%",
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.white)),
                             Text("OFF",
@@ -193,129 +193,136 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   height: 8,
                 ),
                 Text(
-                  "Pilih Varian",
+                  "Deskripsi Prduk",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    //tombol chip
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        margin: EdgeInsets.only(right: 8),
-                        child: Chip(
-                          label: Text("Organik"),
-                          backgroundColor: Colors.green.shade700,
-                          labelStyle: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        margin: EdgeInsets.only(right: 8),
-                        child: Chip(
-                          label: Text("Anorganik"),
-                          backgroundColor: Colors.grey.shade400,
-                          labelStyle: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {},
-                      child: Container(
-                        margin: EdgeInsets.only(right: 8),
-                        child: Chip(
-                          label: Text("Hidroponik"),
-                          backgroundColor: Colors.grey.shade400,
-                          labelStyle: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 SizedBox(
                   height: 8,
                 ),
                 Text(
-                  "Pilih Berat",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  widget.data!["description_product"],
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                 ),
-                Row(
-                  children: [
-                    //tombol chip
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Chip(
-                        label: Text(
-                          "1 Kg",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        side:
-                            BorderSide(color: Colors.green.shade700, width: 1),
-                        backgroundColor: Colors.white,
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Chip(
-                        side:
-                            BorderSide(color: Colors.green.shade700, width: 1),
-                        label: Text("2 Kg"),
-                        backgroundColor: Colors.green.shade700,
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Chip(
-                        label: Text(
-                          "3 Kg",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        side:
-                            BorderSide(color: Colors.green.shade700, width: 1),
-                        backgroundColor: Colors.white,
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Chip(
-                        label: Text(
-                          "4 Kg",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        side:
-                            BorderSide(color: Colors.green.shade700, width: 1),
-                        backgroundColor: Colors.white,
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(right: 8),
-                      child: Chip(
-                        label: Text(
-                          "5 Kg",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        side:
-                            BorderSide(color: Colors.green.shade700, width: 1),
-                        backgroundColor: Colors.white,
-                        labelStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
+                // Row(
+                //   children: [
+                //     //tombol chip
+                //     InkWell(
+                //       onTap: () {},
+                //       child: Container(
+                //         margin: EdgeInsets.only(right: 8),
+                //         child: Chip(
+                //           label: Text("Organik"),
+                //           backgroundColor: Colors.green.shade700,
+                //           labelStyle: TextStyle(color: Colors.white),
+                //         ),
+                //       ),
+                //     ),
+                //     InkWell(
+                //       onTap: () {},
+                //       child: Container(
+                //         margin: EdgeInsets.only(right: 8),
+                //         child: Chip(
+                //           label: Text("Anorganik"),
+                //           backgroundColor: Colors.grey.shade400,
+                //           labelStyle: TextStyle(color: Colors.white),
+                //         ),
+                //       ),
+                //     ),
+                //     InkWell(
+                //       onTap: () {},
+                //       child: Container(
+                //         margin: EdgeInsets.only(right: 8),
+                //         child: Chip(
+                //           label: Text("Hidroponik"),
+                //           backgroundColor: Colors.grey.shade400,
+                //           labelStyle: TextStyle(color: Colors.white),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
+                SizedBox(
+                  height: 8,
                 ),
+                // Text(
+                //   "Pilih Berat",
+                //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                // ),
+                // Row(
+                //   children: [
+                //     //tombol chip
+                //     Container(
+                //       margin: EdgeInsets.only(right: 8),
+                //       child: Chip(
+                //         label: Text(
+                //           "1 Kg",
+                //           style: TextStyle(
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //         side:
+                //             BorderSide(color: Colors.green.shade700, width: 1),
+                //         backgroundColor: Colors.white,
+                //         labelStyle: TextStyle(color: Colors.white),
+                //       ),
+                //     ),
+                //     Container(
+                //       margin: EdgeInsets.only(right: 8),
+                //       child: Chip(
+                //         side:
+                //             BorderSide(color: Colors.green.shade700, width: 1),
+                //         label: Text("2 Kg"),
+                //         backgroundColor: Colors.green.shade700,
+                //         labelStyle: TextStyle(color: Colors.white),
+                //       ),
+                //     ),
+                //     Container(
+                //       margin: EdgeInsets.only(right: 8),
+                //       child: Chip(
+                //         label: Text(
+                //           "3 Kg",
+                //           style: TextStyle(
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //         side:
+                //             BorderSide(color: Colors.green.shade700, width: 1),
+                //         backgroundColor: Colors.white,
+                //         labelStyle: TextStyle(color: Colors.white),
+                //       ),
+                //     ),
+                //     Container(
+                //       margin: EdgeInsets.only(right: 8),
+                //       child: Chip(
+                //         label: Text(
+                //           "4 Kg",
+                //           style: TextStyle(
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //         side:
+                //             BorderSide(color: Colors.green.shade700, width: 1),
+                //         backgroundColor: Colors.white,
+                //         labelStyle: TextStyle(color: Colors.white),
+                //       ),
+                //     ),
+                //     Container(
+                //       margin: EdgeInsets.only(right: 8),
+                //       child: Chip(
+                //         label: Text(
+                //           "5 Kg",
+                //           style: TextStyle(
+                //             color: Colors.black,
+                //           ),
+                //         ),
+                //         side:
+                //             BorderSide(color: Colors.green.shade700, width: 1),
+                //         backgroundColor: Colors.white,
+                //         labelStyle: TextStyle(color: Colors.white),
+                //       ),
+                //     ),
+                //   ],
+                // ),
                 SizedBox(
                   height: 20,
                 ),

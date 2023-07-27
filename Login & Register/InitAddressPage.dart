@@ -121,6 +121,7 @@ class _InitAddressPageState extends State<InitAddressPage> {
 
     setState(() {
       city = data;
+      cityName.clear();
       for (var i=0; i< city.length; i++){
         cityName.add(city[i]['city_name']);
       }
@@ -405,7 +406,8 @@ class _InitAddressPageState extends State<InitAddressPage> {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text("Data tidak boleh kosong"),
                           ));
-                        }else {
+                        }
+                        else {
                           addAddress();
                           // signUp();
                         }

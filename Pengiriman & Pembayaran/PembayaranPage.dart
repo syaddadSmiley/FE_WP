@@ -7,6 +7,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:waroeng_pangan/BotNav & Main Page/BotNav.dart';
 import 'PembayaranLanjutanPage.dart';
 //import http
 import 'package:http/http.dart' as http;
@@ -65,14 +66,18 @@ class _PembayaranPageState extends State<PembayaranPage> {
       orderItemRequest.add({
         "id_product": widget.productItem[i]["id"],
         "quantity": widget.totalQuantity[i].toString(),
+        "name" : widget.productItem[i]["name_product"],
         "price": widget.productItem[i]["price"],
+        "description" : "produkWP"
       });
     }
 
     orderItemRequest.add({
       "id_product" : widget.productItem[0]["id"],
       "quantity" : "1",
+      "name" : "Biaya Pengiriman",
       "price" : widget.deliveryFee,
+      "description" : widget.selectedDeliveryDescription,
     });
 
     orderRequest = {
@@ -96,7 +101,11 @@ class _PembayaranPageState extends State<PembayaranPage> {
       print(response.body);
       var redirect_url = jsonDecode(response.body)["redirect_url"];
       //show pop up
-      _launchUrl(Uri.parse(redirect_url));
+      _launchUrl(redirect_url);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => BotNavBarPage()));
     } else {
       print(response.body);
     }
@@ -106,7 +115,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
   Future<void> _launchUrl(url) async {
 
     if (await canLaunchUrl(Uri.parse(url))) {
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
   } else {
     throw 'Could not launch $url';
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:waroeng_pangan/Login%20&%20Register/LoginPage.dart';
+import 'package:waroeng_pangan/Pengiriman & Pembayaran/RiwayatTransaksiPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -121,10 +122,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         MaterialPageRoute(builder: (context) => LoginPage(showBottomSheet: true,)));
                   } else {
                     // ignore: use_build_context_synchronously
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => const HistoryPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const RiwayatTransaksiPage()));
                   }
                 },
                 child: Container(

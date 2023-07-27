@@ -83,6 +83,7 @@ class _HomePageState extends State<HomePage> {
         selectedAddress = userAddress.firstWhere((element) => element['is_default'] == true);
         SharedPreferences.getInstance().then((prefs) {
           prefs.setString('address', selectedAddress["id"]);
+          prefs.setString('addressCity', selectedAddress["city"]);
         });
       });
       return;

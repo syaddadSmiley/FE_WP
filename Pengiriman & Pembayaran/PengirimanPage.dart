@@ -73,7 +73,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
       productItem = widget.productItem;
       selectedCity = widget.selectedCity;
       getServiceCourier();
-      
+      print(widget.address);
     });
     super.initState();
   }
@@ -554,6 +554,7 @@ class _PengirimanPageState extends State<PengirimanPage> {
                                   selectedServiceMethod = serviceItem[index]["service"].toString();
                                   selectedServiceCost = serviceItem[index]["cost"][0]['value'].toString();
                                   selectedServiceEstimation = serviceItem[index]["cost"][0]['etd'].toString();
+                                  selectedServiceDescription = serviceItem[index]["description"].toString();
                                   totalPrice += int.parse(selectedServiceCost);
                                 });
                                 Navigator.pop(context);

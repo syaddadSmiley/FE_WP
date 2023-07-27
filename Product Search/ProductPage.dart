@@ -364,6 +364,9 @@ class GridCategory extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 5),
+                  SizedBox(height: 5),
+                  SizedBox(height: 5),
+                  SizedBox(height: 5),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -371,34 +374,34 @@ class GridCategory extends StatelessWidget {
                       semanticsLabel: "Rp. 15.000",
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         color: Colors.black,
                       ),
                     ),
                   ),
                   SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text(
-                        "Rp. 15.000",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        "33% OFF",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Text(
+                  //       "Rp. 15.000",
+                  //       textAlign: TextAlign.left,
+                  //       style: TextStyle(
+                  //         fontSize: 12,
+                  //         color: Colors.grey.shade600,
+                  //         decoration: TextDecoration.lineThrough,
+                  //       ),
+                  //     ),
+                  //     SizedBox(width: 5),
+                  //     Text(
+                  //       "33% OFF",
+                  //       textAlign: TextAlign.left,
+                  //       style: TextStyle(
+                  //         fontSize: 12,
+                  //         color: Colors.red,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
